@@ -102,7 +102,7 @@ def run_incremental_crawl(initial_categories_list):
 
     for cat_id in categories_to_run:
         print(f"\n Danh mục ID: {cat_id}...", flush=True)
-        page, product_count, max_products_per_cat = 1, 0, 300
+        page, product_count, max_products_per_cat = 1, 0, 20
 
         while product_count < max_products_per_cat:
             prod_url = f"https://tiki.vn/api/v2/products?category={cat_id}&page={page}&limit=40"
@@ -160,6 +160,9 @@ def run_incremental_crawl(initial_categories_list):
         json.dump(state, f, ensure_ascii=False, indent=4)
 
     print(f"\n Đang đẩy tệp phân mảnh ca số {current_batch_idx} lên Google Drive...", flush=True)
+
+    service = get_drive_service()
+    
     upload_or_update_to_drive(service, STATE_FILE, STATE_FILE, STATE_FOLDER_ID, "application/json")
     upload_or_update_to_drive(service, PRODUCT_FILE, PRODUCT_FILE, PRODUCTS_FOLDER_ID)
     upload_or_update_to_drive(service, REVIEW_FILE, REVIEW_FILE, REVIEWS_FOLDER_ID)
