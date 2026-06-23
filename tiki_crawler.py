@@ -102,7 +102,7 @@ def run_incremental_crawl(initial_categories_list):
 
     for cat_id in categories_to_run:
         print(f"\n Danh mục ID: {cat_id}...", flush=True)
-        page, product_count, max_products_per_cat = 1, 0, 20
+        page, product_count, max_products_per_cat = 1, 0, 500
 
         while product_count < max_products_per_cat:
             prod_url = f"https://tiki.vn/api/v2/products?category={cat_id}&page={page}&limit=40"
