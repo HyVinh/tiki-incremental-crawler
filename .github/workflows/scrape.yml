@@ -2,7 +2,7 @@ name: Automated Tiki Incremental Crawler
 
 on:
   schedule:
-    - cron: '22 * * * *'  # Cứ mỗi 2 tiếng hệ thống tự chạy 1 lần
+    - cron: '1 */2 * * *'  # Cứ mỗi 2 tiếng hệ thống tự chạy 1 lần
   workflow_dispatch:      # Kích hoạt nút bấm chạy thủ công
 
 jobs:
