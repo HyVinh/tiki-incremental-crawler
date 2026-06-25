@@ -97,7 +97,7 @@ def run_incremental_crawl(initial_categories_list):
     prod_writer.writeheader()
 
     f_rev = open(REVIEW_FILE, mode="w", encoding="utf-8-sig", newline="")
-    rev_writer = csv.DictWriter(f_rev, fieldnames=["ID Sản Phẩm", "Tên Sản Phẩm", "ID Đánh Giá", "Người mua", "Số sao", "Nội dung bình luận", "Ngày đánh giá"])
+    rev_writer = csv.DictWriter(f_rev, fieldnames=["ID Sản Phẩm", "Tên Sản Phẩm", "ID Đánh Giá", "User ID", "Người mua", "Vùng miền", "Số sao", "Nội dung bình luận", "Ngày đánh giá"])
     rev_writer.writeheader()
 
     for cat_id in categories_to_run:
@@ -135,9 +135,16 @@ def run_incremental_crawl(initial_categories_list):
                                     buyer = r.get("created_by", {}).get("full_name", "").strip()
                                     if not buyer or buyer in seen_buyers: continue
                                     seen_buyers.add(buyer)
+                                    user_obj = r.get("created_by", {})
                                     rev_writer.writerow({
-                                        "ID Sản Phẩm": pid, "Tên Sản Phẩm": p_name, "ID Đánh Giá": r.get("id"),
-                                        "Người mua": buyer, "Số sao": r.get("rating"), "Nội dung bình luận": r.get("content"),
+                                        "ID Sản Phẩm": pid, 
+                                        "Tên Sản Phẩm": p_name, 
+                                        "ID Đánh Giá": r.get("id"),
+                                        "User ID": user_obj.get("id", "Không rõ"),            # LẤY THÊM ID USER
+                                        "Người mua": buyer, 
+                                        "Vùng miền": user_obj.get("region", "Không rõ"),     # LẤY THÊM VÙNG MIỀN
+                                        "Số sao": r.get("rating"), 
+                                        "Nội dung bình luận": r.get("content"),
                                         "Ngày đánh giá": r.get("timeline", {}).get("review_created_date")
                                     })
                         except: break
