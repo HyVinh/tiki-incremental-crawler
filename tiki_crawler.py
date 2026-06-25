@@ -92,17 +92,36 @@ def run_incremental_crawl(initial_categories_list):
     PRODUCT_FILE = f"tiki_products_batch_{current_batch_idx:02d}.csv"
     REVIEW_FILE = f"tiki_reviews_batch_{current_batch_idx:02d}.csv"
 
+    # Khởi tạo file chưa thông tin Sản phẩm (Products)
     f_prod = open(PRODUCT_FILE, mode="w", encoding="utf-8-sig", newline="")
-    prod_writer = csv.DictWriter(f_prod, fieldnames=["ID Danh Mục", "ID Sản Phẩm", "Tên Sản Phẩm", "URL Sản Phẩm", "Thương Hiệu / Tác Giả", "Giá", "Đánh Giá TB"])
+    prod_writer = csv.DictWriter(f_prod, fieldnames=[
+        "category_id", 
+        "product_id", 
+        "product_name", 
+        "product_url", 
+        "brand_or_author", 
+        "price", 
+        "average_rating"
+    ])
     prod_writer.writeheader()
 
+    #Khởi tạo file chứa thông tin Đánh giá (Reviews)
     f_rev = open(REVIEW_FILE, mode="w", encoding="utf-8-sig", newline="")
-    rev_writer = csv.DictWriter(f_rev, fieldnames=["ID Sản Phẩm", "Tên Sản Phẩm", "ID Đánh Giá", "User ID", "Người mua", "Vùng miền", "Số sao", "Nội dung bình luận", "Ngày đánh giá"])
+    rev_writer = csv.DictWriter(f_rev, fieldnames=[
+        "product_id", 
+        "product_name", 
+        "review_id", 
+        "user_id", 
+        "buyer_name", 
+        "rating", 
+        "comment", 
+        "review_date"
+    ])
     rev_writer.writeheader()
 
     for cat_id in categories_to_run:
         print(f"\n Danh mục ID: {cat_id}...", flush=True)
-        page, product_count, max_products_per_cat = 1, 0, 500
+        page, product_count, max_products_per_cat = 1, 0, 700
 
         while product_count < max_products_per_cat:
             prod_url = f"https://tiki.vn/api/v2/products?category={cat_id}&page={page}&limit=40"
@@ -116,10 +135,13 @@ def run_incremental_crawl(initial_categories_list):
                     pid = str(p.get("id"))
                     p_name = p.get("name")
                     prod_writer.writerow({
-                        "ID Danh Mục": cat_id, "ID Sản Phẩm": pid, "Tên Sản Phẩm": p_name,
-                        "URL Sản Phẩm": f"https://tiki.vn/{p.get('url_path')}",
-                        "Thương Hiệu / Tác Giả": p.get("brand_name", "Không rõ"), "Giá": p.get("price"),
-                        "Đánh Giá TB": p.get("rating_average")
+                        "category_id": cat_id, 
+                        "product_id": pid, 
+                        "product_name": p_name,
+                        "product_url": f"https://tiki.vn/{p.get('url_path')}",
+                        "brand_or_author": p.get("brand_name", "unknown"), 
+                        "price": p.get("price"),
+                        "average_rating": p.get("rating_average")
                     })
                     product_count += 1
 
@@ -136,17 +158,16 @@ def run_incremental_crawl(initial_categories_list):
                                     if not buyer or buyer in seen_buyers: continue
                                     seen_buyers.add(buyer)
                                     user_obj = r.get("created_by", {})
-                                    rev_writer.writerow({
-                                        "ID Sản Phẩm": pid, 
-                                        "Tên Sản Phẩm": p_name, 
-                                        "ID Đánh Giá": r.get("id"),
-                                        "User ID": user_obj.get("id", "Không rõ"),            # LẤY THÊM ID USER
-                                        "Người mua": buyer, 
-                                        "Vùng miền": user_obj.get("region", "Không rõ"),     # LẤY THÊM VÙNG MIỀN
-                                        "Số sao": r.get("rating"), 
-                                        "Nội dung bình luận": r.get("content"),
-                                        "Ngày đánh giá": r.get("timeline", {}).get("review_created_date")
-                                    })
+                                    rev_writer = csv.DictWriter(f_rev, fieldnames=[
+                                        "product_id", 
+                                        "product_name", 
+                                        "review_id", 
+                                        "user_id", 
+                                        "buyer_name", 
+                                        "rating", 
+                                        "comment", 
+                                        "review_date"
+                                    ])
                         except: break
                         time.sleep(0.4)
                 print(f"   -> Hoàn tất trang {page}. Lũy kế: {product_count} SP.", flush=True)
