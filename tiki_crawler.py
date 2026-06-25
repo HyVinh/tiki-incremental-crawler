@@ -158,16 +158,16 @@ def run_incremental_crawl(initial_categories_list):
                                     if not buyer or buyer in seen_buyers: continue
                                     seen_buyers.add(buyer)
                                     user_obj = r.get("created_by", {})
-                                    rev_writer = csv.DictWriter(f_rev, fieldnames=[
-                                        "product_id", 
-                                        "product_name", 
-                                        "review_id", 
-                                        "user_id", 
-                                        "buyer_name", 
-                                        "rating", 
-                                        "comment", 
-                                        "review_date"
-                                    ])
+                                    rev_writer.writerow({
+                                        "product_id": pid, 
+                                        "product_name": p_name, 
+                                        "review_id": r.get("id"),
+                                        "user_id": user_obj.get("id", "unknown"),
+                                        "buyer_name": buyer, 
+                                        "rating": r.get("rating"),
+                                        "comment": r.get("content"),
+                                        "review_date": r.get("timeline", {}).get("review_created_date")
+                                    })
                         except: break
                         time.sleep(0.4)
                 print(f"   -> Hoàn tất trang {page}. Lũy kế: {product_count} SP.", flush=True)
